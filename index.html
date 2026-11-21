@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <title>rinjang</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --mint-bg: #dff5ec;
+      --mint-dot: #98c9b6;
+      --card-surface: rgba(249, 253, 251, 0.96);
+      --inner-surface: #eef9f4;
+      --border-mint: #bce4d4;
+      --accent-mint: #5ba38a;
+      --text-main: #2b594a;
+      --text-muted: #5d8a7b;
+      --shadow-mint: 0 8px 24px rgba(84, 150, 126, 0.14);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', 'Mitr', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--mint-bg);
+      background-image: radial-gradient(var(--mint-dot) 1.6px, transparent 1.6px);
+      background-size: 20px 20px;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 16px 14px 56px;
+    }
+
+    .nav-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background-color: var(--card-surface);
+      border: 1.5px solid var(--border-mint);
+      border-radius: 22px;
+      padding: 6px;
+      box-shadow: var(--shadow-mint);
+      margin-bottom: 16px;
+    }
+
+    .nav-tab {
+      padding: 8px 4px;
+      border: none;
+      border-radius: 16px;
+      background-color: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .nav-tab.active {
+      background-color: var(--accent-mint);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .page-panel {
+      display: none;
+    }
+
+    .page-panel.active {
+      display: block;
+    }
+
+    .card {
+      background-color: var(--card-surface);
+      border: 1.5px solid var(--border-mint);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: var(--shadow-mint);
+      margin-bottom: 14px;
+    }
+
+    .home-profile-card {
+      text-align: center;
+      padding-bottom: 22px;
+    }
+
+    .banner-img {
+      width: 100%;
+      height: 138px;
+      object-fit: cover;
+      border-radius: 18px;
+      display: block;
+      margin-bottom: -44px;
+      border: 2px solid var(--card-surface);
+      background-color: var(--inner-surface);
+    }
+
+    .avatar-img {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3.5px solid var(--card-surface);
+      background-color: var(--inner-surface);
+      position: relative;
+      z-index: 2;
+      box-shadow: var(--shadow-mint);
+    }
+
+    .shop-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 10px;
+    }
+
+    .shop-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.65;
+      white-space: pre-line;
+      display: none;
+    }
+
+    .shop-desc.has-text {
+      display: block;
+    }
+
+    .line-oa-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 18px;
+      background-color: var(--accent-mint);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(91, 163, 138, 0.25);
+    }
+
+    .section-heading {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .section-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      white-space: pre-line;
+      text-align: center;
+      display: none;
+    }
+
+    .section-desc.has-text {
+      display: block;
+    }
+
+    .posts-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .post-box {
+      background-color: var(--inner-surface);
+      border: 1px solid var(--border-mint);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .post-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .post-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .post-link-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 7px 14px;
+      border-radius: 14px;
+      background-color: var(--accent-mint);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .links-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .item-link-btn {
+      display: block;
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 16px;
+      background-color: var(--inner-surface);
+      border: 1px solid var(--border-mint);
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .empty-state {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 12px 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-bar">
+      <button type="button" class="nav-tab active" id="btn-home" onclick="switchTab('home')">home</button>
+      <button type="button" class="nav-tab" id="btn-game" onclick="switchTab('game')">game</button>
+      <button type="button" class="nav-tab" id="btn-example" onclick="switchTab('example')">example</button>
+      <button type="button" class="nav-tab" id="btn-detail" onclick="switchTab('detail')">detail</button>
+    </div>
+
+    <!-- หน้า home -->
+    <div id="panel-home" class="page-panel active">
+      <div class="card home-profile-card">
+        <img id="homeBanner" class="banner-img" src="https://files.catbox.moe/2mv64c.jpeg" alt="rinjang banner">
+        <img id="homeAvatar" class="avatar-img" src="https://files.catbox.moe/h8pid8.jpeg" alt="rinjang profile">
+        <h1 id="homeShopName" class="shop-title">rinjang</h1>
+        <p id="homeDesc" class="shop-desc"></p>
+      </div>
+
+      <div class="card">
+        <a id="lineOaLink" href="https://lin.ee/6SC6aBD" target="_blank" rel="noopener noreferrer" class="line-oa-btn">line oa</a>
+      </div>
+    </div>
+
+    <!-- หน้า game -->
+    <div id="panel-game" class="page-panel">
+      <div class="card">
+        <h2 class="section-heading">game</h2>
+        <p id="gameDesc" class="section-desc"></p>
+        <div id="gameLinks" class="links-stack"></div>
+        <div id="gamePosts" class="posts-stack"></div>
+        <div id="gameEmpty" class="empty-state"></div>
+      </div>
+    </div>
+
+    <!-- หน้า example -->
+    <div id="panel-example" class="page-panel">
+      <div class="card">
+        <h2 class="section-heading">example</h2>
+        <p id="exampleDesc" class="section-desc"></p>
+        <div id="exampleLinks" class="links-stack"></div>
+        <div id="examplePosts" class="posts-stack"></div>
+        <div id="exampleEmpty" class="empty-state"></div>
+      </div>
+    </div>
+
+    <!-- หน้า detail -->
+    <div id="panel-detail" class="page-panel">
+      <div class="card">
+        <h2 class="section-heading">detail</h2>
+        <p id="detailDesc" class="section-desc"></p>
+        <div id="detailLinks" class="links-stack"></div>
+        <div id="detailPosts" class="posts-stack"></div>
+        <div id="detailEmpty" class="empty-state"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpAGDSy1NRgmLV_g7qJrCpwOhU9MrfQyY",
+      authDomain: "benefitie.firebaseapp.com",
+      projectId: "benefitie",
+      storageBucket: "benefitie.firebasestorage.app",
+      messagingSenderId: "270365672215",
+      appId: "1:270365672215:web:230d1491091e26ce83ed52"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    const SITE_COLLECTION = "rinjang_site";
+    const SITE_DOC = "main_config";
+
+    const DEFAULT_BANNER = "https://files.catbox.moe/2mv64c.jpeg";
+    const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
+    const DEFAULT_LINE_NAME = "line oa";
+    const DEFAULT_LINE_URL = "https://lin.ee/6SC6aBD";
+
+    function switchTab(tabName) {
+      ["home", "game", "example", "detail"].forEach(name => {
+        const btn = document.getElementById(`btn-${name}`);
+        const panel = document.getElementById(`panel-${name}`);
+        if (name === tabName) {
+          btn.classList.add("active");
+          panel.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+          panel.classList.remove("active");
+        }
+      });
+    }
+
+    function setOptionalText(el, text) {
+      const clean = (typeof text === "string") ? text.trim() : "";
+      el.textContent = clean;
+      if (clean) {
+        el.classList.add("has-text");
+      } else {
+        el.classList.remove("has-text");
+      }
+    }
+
+    function renderSectionContent(prefix, sectionObj) {
+      const sec = sectionObj || {};
+      const descEl = document.getElementById(`${prefix}Desc`);
+      const linksEl = document.getElementById(`${prefix}Links`);
+      const postsEl = document.getElementById(`${prefix}Posts`);
+      const emptyEl = document.getElementById(`${prefix}Empty`);
+
+      const descText = (typeof sec.description === "string") ? sec.description.trim() : "";
+      const linksList = Array.isArray(sec.links) ? sec.links.filter(item => item && (item.label || item.url)) : [];
+      const postsList = Array.isArray(sec.posts) ? sec.posts.filter(item => item && (item.title || item.body || item.linkUrl)) : [];
+
+      setOptionalText(descEl, descText);
+
+      linksEl.innerHTML = linksList.map(item => {
+        const label = item.label || item.url;
+        const href = item.url || "#";
+        return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer" class="item-link-btn">${escapeHtml(label)}</a>`;
+      }).join("");
+
+      postsEl.innerHTML = postsList.map(post => {
+        const titleHtml = post.title ? `<div class="post-title">${escapeHtml(post.title)}</div>` : "";
+        const bodyHtml = post.body ? `<div class="post-body">${escapeHtml(post.body)}</div>` : "";
+        const linkBtnHtml = post.linkUrl
+          ? `<a href="${escapeAttr(post.linkUrl)}" target="_blank" rel="noopener noreferrer" class="post-link-btn">${escapeHtml(post.linkLabel || "เปิดลิงก์")}</a>`
+          : "";
+        return `<div class="post-box">${titleHtml}${bodyHtml}${linkBtnHtml}</div>`;
+      }).join("");
+
+      if (!descText && linksList.length === 0 && postsList.length === 0) {
+        emptyEl.textContent = "ยังไม่มีข้อมูล";
+      } else {
+        emptyEl.textContent = "";
+      }
+    }
+
+    function applySiteData(raw) {
+      const data = raw || {};
+      document.getElementById("homeBanner").src = data.banner || DEFAULT_BANNER;
+      document.getElementById("homeAvatar").src = data.profile || DEFAULT_AVATAR;
+      document.getElementById("homeShopName").textContent = data.shopName || "rinjang";
+      setOptionalText(document.getElementById("homeDesc"), data.homeDescription || "");
+
+      const lineBtn = document.getElementById("lineOaLink");
+      lineBtn.textContent = data.lineName || DEFAULT_LINE_NAME;
+      lineBtn.href = data.lineUrl || DEFAULT_LINE_URL;
+
+      renderSectionContent("game", data.game);
+      renderSectionContent("example", data.example);
+      renderSectionContent("detail", data.detail);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(str) {
+      return String(str).replace(/"/g, "&quot;");
+    }
+
+    applySiteData({});
+
+    db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
+      if (doc.exists) {
+        applySiteData(doc.data());
+      }
+    });
+  </script>
+</body>
+</html>
