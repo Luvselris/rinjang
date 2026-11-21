@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - rinjang</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --mint-bg: #dff5ec;
+      --mint-dot: #98c9b6;
+      --card-surface: rgba(249, 253, 251, 0.96);
+      --inner-surface: #eef9f4;
+      --border-mint: #bce4d4;
+      --accent-mint: #5ba38a;
+      --text-main: #2b594a;
+      --text-muted: #5d8a7b;
+      --shadow-mint: 0 8px 24px rgba(84, 150, 126, 0.14);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', 'Mitr', sans-serif;
+    }
+
+    body {
+      background-color: var(--mint-bg);
+      background-image: radial-gradient(var(--mint-dot) 1.6px, transparent 1.6px);
+      background-size: 20px 20px;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 20px 14px 64px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    #loginBox {
+      min-height: 75vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      width: 100%;
+      background-color: var(--card-surface);
+      border: 1.5px solid var(--border-mint);
+      border-radius: 24px;
+      padding: 18px 16px;
+      box-shadow: var(--shadow-mint);
+      margin-bottom: 14px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+
+    .field-group {
+      margin-bottom: 12px;
+    }
+
+    .field-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .input-box, .textarea-box {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border-mint);
+      border-radius: 15px;
+      font-size: 13px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 18px;
+      background-color: var(--accent-mint);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .btn-upload {
+      display: inline-block;
+      padding: 6px 13px;
+      border-radius: 13px;
+      background-color: var(--accent-mint);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      border-radius: 13px;
+      border: 1px solid var(--border-mint);
+      background-color: var(--inner-surface);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-remove {
+      padding: 5px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-mint);
+      background-color: #ffffff;
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .error-msg {
+      color: var(--text-main);
+      font-size: 12.5px;
+      text-align: center;
+      margin-top: 8px;
+      display: none;
+    }
+
+    #dashboardBox {
+      display: none;
+    }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .top-header h2 {
+      font-size: 17px;
+      color: var(--text-main);
+    }
+
+    .btn-logout {
+      padding: 6px 12px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-mint);
+      background-color: var(--card-surface);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .preview-banner {
+      width: 100%;
+      height: 106px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid var(--border-mint);
+      display: block;
+    }
+
+    .preview-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--border-mint);
+      display: block;
+    }
+
+    .sub-block {
+      background-color: var(--inner-surface);
+      border: 1px solid var(--border-mint);
+      border-radius: 18px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .sub-block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .row-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-mint);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .row-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="loginBox">
+      <div class="card">
+        <h1 class="title">Admin - rinjang</h1>
+        <form onsubmit="loginAdmin(event)">
+          <div class="field-group">
+            <label>อีเมล</label>
+            <input type="email" id="adminEmail" class="input-box" placeholder="grouppaikiki@gmail.com" required>
+          </div>
+          <div class="field-group">
+            <label>รหัสผ่าน</label>
+            <input type="password" id="adminPass" class="input-box" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 14px;">เข้าสู่ระบบ</button>
+          <p id="loginErr" class="error-msg">อีเมลหรือรหัสผ่านไม่ถูกต้อง</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="dashboardBox">
+      <div class="top-header">
+        <h2>จัดการเว็บ rinjang</h2>
+        <button type="button" class="btn-logout" onclick="logoutAdmin()">ออกจากระบบ</button>
+      </div>
+
+      <!-- ส่วนหน้า home -->
+      <div class="card">
+        <div class="section-title">หน้า home</div>
+
+        <div class="field-group">
+          <label>แบนเนอร์</label>
+          <img id="prevBanner" class="preview-banner" src="https://files.catbox.moe/2mv64c.jpeg" alt="Banner">
+          <input type="text" id="inputBanner" class="input-box" style="margin-top: 8px;" placeholder="ลิงก์รูปแบนเนอร์">
+          <label class="btn-upload">
+            เลือกรูปแบนเนอร์จากเครื่อง
+            <input type="file" accept="image/*" style="display: none;" onchange="pickImageFile(this, 'banner', 'prevBanner', 'inputBanner')">
+          </label>
+        </div>
+
+        <div class="field-group">
+          <label>โปรไฟล์</label>
+          <img id="prevProfile" class="preview-avatar" src="https://files.catbox.moe/h8pid8.jpeg" alt="Profile">
+          <input type="text" id="inputProfile" class="input-box" style="margin-top: 8px;" placeholder="ลิงก์รูปโปรไฟล์">
+          <label class="btn-upload">
+            เลือกรูปโปรไฟล์จากเครื่อง
+            <input type="file" accept="image/*" style="display: none;" onchange="pickImageFile(this, 'profile', 'prevProfile', 'inputProfile')">
+          </label>
+        </div>
+
+        <div class="field-group">
+          <label>ชื่อร้าน</label>
+          <input type="text" id="inputShopName" class="input-box" value="rinjang">
+        </div>
+
+        <div class="field-group">
+          <label>คำอธิบายหน้าแรก</label>
+          <textarea id="inputHomeDesc" class="textarea-box" rows="2"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label>ชื่อปุ่มไลน์</label>
+          <input type="text" id="inputLineName" class="input-box" value="line oa">
+        </div>
+
+        <div class="field-group">
+          <label>ลิงก์ไลน์</label>
+          <input type="url" id="inputLineUrl" class="input-box" value="https://lin.ee/6SC6aBD">
+        </div>
+      </div>
+
+      <!-- ส่วนแก้ไขหน้า game, example, detail -->
+      <div id="sectionsEditor"></div>
+
+      <button type="button" id="saveBtn" class="btn-primary" onclick="saveAllData()">บันทึกข้อมูลทั้งหมด</button>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_EMAIL = "grouppaikiki@gmail.com";
+    const ADMIN_PASS = "rinjang6767";
+    const SESSION_KEY = "rinjang_admin_logged_in";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCpAGDSy1NRgmLV_g7qJrCpwOhU9MrfQyY",
+      authDomain: "benefitie.firebaseapp.com",
+      projectId: "benefitie",
+      storageBucket: "benefitie.firebasestorage.app",
+      messagingSenderId: "270365672215",
+      appId: "1:270365672215:web:230d1491091e26ce83ed52"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    const SITE_COLLECTION = "rinjang_site";
+    const SITE_DOC = "main_config";
+
+    const DEFAULT_BANNER = "https://files.catbox.moe/2mv64c.jpeg";
+    const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
+
+    function createEmptySection() {
+      return {
+        description: "",
+        links: [],
+        posts: []
+      };
+    }
+
+    let adminState = {
+      banner: DEFAULT_BANNER,
+      profile: DEFAULT_AVATAR,
+      shopName: "rinjang",
+      homeDescription: "",
+      lineName: "line oa",
+      lineUrl: "https://lin.ee/6SC6aBD",
+      game: createEmptySection(),
+      example: createEmptySection(),
+      detail: createEmptySection()
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem(SESSION_KEY) === "true") {
+        openAdminDashboard();
+      }
+    });
+
+    function loginAdmin(e) {
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value.trim();
+      const pass = document.getElementById("adminPass").value;
+      const err = document.getElementById("loginErr");
+
+      if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+        sessionStorage.setItem(SESSION_KEY, "true");
+        err.style.display = "none";
+        openAdminDashboard();
+      } else {
+        err.style.display = "block";
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem(SESSION_KEY);
+      document.getElementById("dashboardBox").style.display = "none";
+      document.getElementById("loginBox").style.display = "flex";
+    }
+
+    function normalizeSection(raw) {
+      const s = raw || {};
+      return {
+        description: typeof s.description === "string" ? s.description : "",
+        links: Array.isArray(s.links) ? s.links.map(l => ({
+          label: l && l.label ? l.label : "",
+          url: l && l.url ? l.url : ""
+        })) : [],
+        posts: Array.isArray(s.posts) ? s.posts.map(p => ({
+          title: p && p.title ? p.title : "",
+          body: p && p.body ? p.body : "",
+          linkLabel: p && p.linkLabel ? p.linkLabel : "",
+          linkUrl: p && p.linkUrl ? p.linkUrl : ""
+        })) : []
+      };
+    }
+
+    async function openAdminDashboard() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("dashboardBox").style.display = "block";
+
+      try {
+        const doc = await db.collection(SITE_COLLECTION).doc(SITE_DOC).get();
+        if (doc.exists) {
+          const d = doc.data() || {};
+          adminState = {
+            banner: d.banner || DEFAULT_BANNER,
+            profile: d.profile || DEFAULT_AVATAR,
+            shopName: d.shopName || "rinjang",
+            homeDescription: typeof d.homeDescription === "string" ? d.homeDescription : "",
+            lineName: d.lineName || "line oa",
+            lineUrl: d.lineUrl || "https://lin.ee/6SC6aBD",
+            game: normalizeSection(d.game),
+            example: normalizeSection(d.example),
+            detail: normalizeSection(d.detail)
+          };
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      renderAdminForm();
+    }
+
+    function renderAdminForm() {
+      document.getElementById("prevBanner").src = adminState.banner || DEFAULT_BANNER;
+      document.getElementById("inputBanner").value = adminState.banner || DEFAULT_BANNER;
+      document.getElementById("prevProfile").src = adminState.profile || DEFAULT_AVATAR;
+      document.getElementById("inputProfile").value = adminState.profile || DEFAULT_AVATAR;
+      document.getElementById("inputShopName").value = adminState.shopName || "rinjang";
+      document.getElementById("inputHomeDesc").value = adminState.homeDescription || "";
+      document.getElementById("inputLineName").value = adminState.lineName || "line oa";
+      document.getElementById("inputLineUrl").value = adminState.lineUrl || "https://lin.ee/6SC6aBD";
+
+      const container = document.getElementById("sectionsEditor");
+      const sectionKeys = ["game", "example", "detail"];
+
+      container.innerHTML = sectionKeys.map(key => {
+        const sec = adminState[key];
+        const linksHtml = sec.links.map((item, idx) => `
+          <div class="row-card">
+            <div class="row-top">
+              <span>ลิงก์ที่ ${idx + 1}</span>
+              <button type="button" class="btn-remove" onclick="removeSectionLink('${key}', ${idx})">ลบ</button>
+            </div>
+            <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="ชื่อลิงก์" value="${escapeAttr(item.label)}" oninput="updateLinkField('${key}', ${idx}, 'label', this.value)">
+            <input type="url" class="input-box" placeholder="https://..." value="${escapeAttr(item.url)}" oninput="updateLinkField('${key}', ${idx}, 'url', this.value)">
+          </div>
+        `).join("");
+
+        const postsHtml = sec.posts.map((post, idx) => `
+          <div class="row-card">
+            <div class="row-top">
+              <span>โพสต์ที่ ${idx + 1}</span>
+              <button type="button" class="btn-remove" onclick="removeSectionPost('${key}', ${idx})">ลบ</button>
+            </div>
+            <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="หัวข้อโพสต์" value="${escapeAttr(post.title)}" oninput="updatePostField('${key}', ${idx}, 'title', this.value)">
+            <textarea class="textarea-box" rows="2" style="margin-bottom: 6px;" placeholder="ข้อความโพสต์" oninput="updatePostField('${key}', ${idx}, 'body', this.value)">${escapeHtml(post.body)}</textarea>
+            <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="ข้อความปุ่มลิงก์ (ถ้ามี)" value="${escapeAttr(post.linkLabel)}" oninput="updatePostField('${key}', ${idx}, 'linkLabel', this.value)">
+            <input type="url" class="input-box" placeholder="ลิงก์ในโพสต์ (ถ้ามี)" value="${escapeAttr(post.linkUrl)}" oninput="updatePostField('${key}', ${idx}, 'linkUrl', this.value)">
+          </div>
+        `).join("");
+
+        return `
+          <div class="card">
+            <div class="section-title">หน้า ${key}</div>
+
+            <div class="field-group">
+              <label>คำอธิบายหน้า ${key}</label>
+              <textarea class="textarea-box" rows="2" placeholder="คำอธิบาย..." oninput="updateSectionDesc('${key}', this.value)">${escapeHtml(sec.description)}</textarea>
+            </div>
+
+            <div class="sub-block">
+              <div class="sub-block-head">
+                <span>ลิงก์</span>
+                <button type="button" class="btn-small" onclick="addSectionLink('${key}')">+ เพิ่มลิงก์</button>
+              </div>
+              ${linksHtml}
+            </div>
+
+            <div class="sub-block">
+              <div class="sub-block-head">
+                <span>โพสต์</span>
+                <button type="button" class="btn-small" onclick="addSectionPost('${key}')">+ เพิ่มโพสต์</button>
+              </div>
+              ${postsHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function pickImageFile(input, stateKey, imgId, textInputId) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const result = ev.target.result;
+        adminState[stateKey] = result;
+        document.getElementById(imgId).src = result;
+        document.getElementById(textInputId).value = result;
+      };
+      reader.readAsDataURL(input.files[0]);
+      input.value = "";
+    }
+
+    function updateSectionDesc(key, val) {
+      adminState[key].description = val;
+    }
+
+    function addSectionLink(key) {
+      adminState[key].links.push({ label: "", url: "" });
+      renderAdminForm();
+    }
+
+    function removeSectionLink(key, idx) {
+      adminState[key].links.splice(idx, 1);
+      renderAdminForm();
+    }
+
+    function updateLinkField(key, idx, field, val) {
+      adminState[key].links[idx][field] = val;
+    }
+
+    function addSectionPost(key) {
+      adminState[key].posts.push({ title: "", body: "", linkLabel: "", linkUrl: "" });
+      renderAdminForm();
+    }
+
+    function removeSectionPost(key, idx) {
+      adminState[key].posts.splice(idx, 1);
+      renderAdminForm();
+    }
+
+    function updatePostField(key, idx, field, val) {
+      adminState[key].posts[idx][field] = val;
+    }
+
+    async function saveAllData() {
+      const btn = document.getElementById("saveBtn");
+      btn.disabled = true;
+      btn.textContent = "กำลังบันทึก...";
+
+      adminState.banner = document.getElementById("inputBanner").value.trim() || DEFAULT_BANNER;
+      adminState.profile = document.getElementById("inputProfile").value.trim() || DEFAULT_AVATAR;
+      adminState.shopName = document.getElementById("inputShopName").value.trim() || "rinjang";
+      adminState.homeDescription = document.getElementById("inputHomeDesc").value;
+      adminState.lineName = document.getElementById("inputLineName").value.trim() || "line oa";
+      adminState.lineUrl = document.getElementById("inputLineUrl").value.trim() || "https://lin.ee/6SC6aBD";
+
+      try {
+        await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(adminState);
+        alert("บันทึกข้อมูลเรียบร้อยแล้ว");
+      } catch (err) {
+        alert("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "บันทึกข้อมูลทั้งหมด";
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function escapeAttr(str) {
+      return String(str).replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
