@@ -173,6 +173,48 @@
       flex-shrink: 0;
     }
 
+    .home-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .home-stat-box {
+      background-color: var(--inner-green);
+      border: 1px solid var(--border-soft-green);
+      border-radius: 18px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .home-stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink-main);
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+
+    .home-stat-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .stat-mini-star {
+      width: 13px;
+      height: 13px;
+      fill: var(--star-active);
+      stroke: var(--ink-main);
+      stroke-width: 1.4;
+      display: inline-block;
+    }
+
     .section-heading {
       font-size: 16px;
       font-weight: 700;
@@ -435,6 +477,30 @@
           <span class="line-oa-hint">click to chat</span>
         </a>
       </div>
+
+      <div class="card">
+        <div class="home-stats-grid">
+          <div class="home-stat-box" onclick="switchTab('review')">
+            <div class="home-stat-num" id="homeTotalReviews">0</div>
+            <div class="home-stat-label">
+              <span>Total Reviews</span>
+              <svg class="stat-mini-star" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="12 2.5 14.95 8.48 21.55 9.44 16.77 14.1 17.9 20.67 12 17.57 6.1 20.67 7.23 14.1 2.45 9.44 9.05 8.48 12 2.5"></polygon>
+              </svg>
+            </div>
+          </div>
+
+          <div class="home-stat-box" onclick="switchTab('review')">
+            <div class="home-stat-num" id="homeAvgRating">0.0</div>
+            <div class="home-stat-label">
+              <span>Rating</span>
+              <svg class="stat-mini-star" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="12 2.5 14.95 8.48 21.55 9.44 16.77 14.1 17.9 20.67 12 17.57 6.1 20.67 7.23 14.1 2.45 9.44 9.05 8.48 12 2.5"></polygon>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- หน้า review -->
@@ -540,12 +606,27 @@
       renderStarPicker();
     }
 
+    function updateHomeReviewStats(list) {
+      const totalEl = document.getElementById("homeTotalReviews");
+      const ratingEl = document.getElementById("homeAvgRating");
+      if (!Array.isArray(list) || list.length === 0) {
+        totalEl.textContent = "0";
+        ratingEl.textContent = "0.0";
+        return;
+      }
+      const sum = list.reduce((acc, item) => acc + (Number(item.rating) || 5), 0);
+      const avg = (sum / list.length).toFixed(1);
+      totalEl.textContent = String(list.length);
+      ratingEl.textContent = avg;
+    }
+
     function renderReviewsSection(reviewData) {
       const rObj = reviewData || {};
       setOptionalText(document.getElementById("reviewDesc"), rObj.description || "");
 
       const list = Array.isArray(rObj.items) ? rObj.items : [];
       currentReviews = list;
+      updateHomeReviewStats(list);
 
       const summaryEl = document.getElementById("reviewSummary");
       const listEl = document.getElementById("reviewList");
