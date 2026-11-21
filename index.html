@@ -145,6 +145,12 @@
       display: block;
     }
 
+    .social-links-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .line-oa-box {
       display: flex;
       align-items: center;
@@ -472,10 +478,17 @@
       </div>
 
       <div class="card">
-        <a id="lineOaLink" href="https://lin.ee/6SC6aBD" target="_blank" rel="noopener noreferrer" class="line-oa-box">
-          <span id="lineOaLabel" class="line-oa-label">line oa</span>
-          <span class="line-oa-hint">click to chat</span>
-        </a>
+        <div class="social-links-stack">
+          <a id="lineOaLink" href="https://lin.ee/6SC6aBD" target="_blank" rel="noopener noreferrer" class="line-oa-box">
+            <span id="lineOaLabel" class="line-oa-label">line oa</span>
+            <span class="line-oa-hint">click to chat</span>
+          </a>
+
+          <a id="igLink" href="https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr" target="_blank" rel="noopener noreferrer" class="line-oa-box">
+            <span id="igLabel" class="line-oa-label">Instagram</span>
+            <span class="line-oa-hint">click to chat</span>
+          </a>
+        </div>
       </div>
 
       <div class="card">
@@ -578,6 +591,8 @@
     const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
     const DEFAULT_LINE_NAME = "line oa";
     const DEFAULT_LINE_URL = "https://lin.ee/6SC6aBD";
+    const DEFAULT_IG_NAME = "Instagram";
+    const DEFAULT_IG_URL = "https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr";
 
     let selectedRating = 5;
     let currentReviews = [];
@@ -673,26 +688,41 @@
       btn.textContent = "กำลังส่ง...";
 
       const newReview = {
-        name,
-        comment,
-        rating: selectedRating,
+        name: String(name),
+        comment: String(comment),
+        rating: Number(selectedRating) || 5,
         createdAt: Date.now()
       };
 
-      const updatedItems = [newReview, ...currentReviews];
+      const docRef = db.collection(SITE_COLLECTION).doc(SITE_DOC);
 
       try {
-        await db.collection(SITE_COLLECTION).doc(SITE_DOC).set({
-          review: {
-            items: updatedItems
-          }
-        }, { merge: true });
+        const snap = await docRef.get();
+        const existingItems = snap.exists && snap.data() && snap.data().review && Array.isArray(snap.data().review.items)
+          ? snap.data().review.items
+          : currentReviews;
+
+        const updatedItems = [newReview, ...existingItems];
+
+        if (snap.exists) {
+          await docRef.update({
+            "review.items": updatedItems
+          });
+        } else {
+          await docRef.set({
+            review: {
+              description: "",
+              items: updatedItems
+            }
+          }, { merge: true });
+        }
 
         nameInput.value = "";
         commentInput.value = "";
         setRating(5);
       } catch (err) {
-        alert("ส่งรีวิวไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        console.error("Review submit error:", err);
+        alert("ส่งรีวิวไม่สำเร็จ: " + (err && err.message ? err.message : "กรุณาลองใหม่อีกครั้ง"));
       } finally {
         btn.disabled = false;
         btn.textContent = "ส่งรีวิว";
@@ -775,6 +805,11 @@
       lineLabel.textContent = data.lineName || DEFAULT_LINE_NAME;
       lineBtn.href = data.lineUrl || DEFAULT_LINE_URL;
 
+      const igBtn = document.getElementById("igLink");
+      const igLabel = document.getElementById("igLabel");
+      igLabel.textContent = data.igName || DEFAULT_IG_NAME;
+      igBtn.href = data.igUrl || DEFAULT_IG_URL;
+
       renderReviewsSection(data.review);
       renderSectionContent("game", data.game);
       renderSectionContent("example", data.example);
@@ -799,6 +834,8 @@
       if (doc.exists) {
         applySiteData(doc.data());
       }
+    }, err => {
+      console.error("Firestore listen error:", err);
     });
   </script>
 </body>
