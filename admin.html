@@ -351,6 +351,16 @@
           <label>ลิงก์ไลน์</label>
           <input type="url" id="inputLineUrl" class="input-box" value="https://lin.ee/6SC6aBD">
         </div>
+
+        <div class="field-group">
+          <label>ชื่อกล่อง Instagram</label>
+          <input type="text" id="inputIgName" class="input-box" value="Instagram">
+        </div>
+
+        <div class="field-group">
+          <label>ลิงก์ Instagram</label>
+          <input type="url" id="inputIgUrl" class="input-box" value="https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr">
+        </div>
       </div>
 
       <!-- ส่วนจัดการหน้า review -->
@@ -401,6 +411,8 @@
 
     const DEFAULT_BANNER = "https://files.catbox.moe/2mv64c.jpeg";
     const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
+    const DEFAULT_IG_NAME = "Instagram";
+    const DEFAULT_IG_URL = "https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr";
 
     function createEmptySection() {
       return {
@@ -417,6 +429,8 @@
       homeDescription: "",
       lineName: "line oa",
       lineUrl: "https://lin.ee/6SC6aBD",
+      igName: DEFAULT_IG_NAME,
+      igUrl: DEFAULT_IG_URL,
       review: {
         description: "",
         items: []
@@ -499,6 +513,8 @@
             homeDescription: typeof d.homeDescription === "string" ? d.homeDescription : "",
             lineName: d.lineName || "line oa",
             lineUrl: d.lineUrl || "https://lin.ee/6SC6aBD",
+            igName: d.igName || DEFAULT_IG_NAME,
+            igUrl: d.igUrl || DEFAULT_IG_URL,
             review: normalizeReview(d.review),
             game: normalizeSection(d.game),
             example: normalizeSection(d.example),
@@ -510,6 +526,13 @@
       }
 
       renderAdminForm();
+
+      db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
+        if (!doc.exists) return;
+        const d = doc.data() || {};
+        adminState.review = normalizeReview(d.review);
+        renderAdminReviews();
+      });
     }
 
     function renderAdminReviews() {
@@ -532,9 +555,16 @@
       `).join("");
     }
 
-    function removeAdminReview(idx) {
+    async function removeAdminReview(idx) {
       adminState.review.items.splice(idx, 1);
       renderAdminReviews();
+      try {
+        await db.collection(SITE_COLLECTION).doc(SITE_DOC).update({
+          "review.items": adminState.review.items
+        });
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     function renderAdminForm() {
@@ -546,6 +576,8 @@
       document.getElementById("inputHomeDesc").value = adminState.homeDescription || "";
       document.getElementById("inputLineName").value = adminState.lineName || "line oa";
       document.getElementById("inputLineUrl").value = adminState.lineUrl || "https://lin.ee/6SC6aBD";
+      document.getElementById("inputIgName").value = adminState.igName || DEFAULT_IG_NAME;
+      document.getElementById("inputIgUrl").value = adminState.igUrl || DEFAULT_IG_URL;
       document.getElementById("inputReviewDesc").value = adminState.review.description || "";
       renderAdminReviews();
 
@@ -722,9 +754,15 @@
       adminState.homeDescription = document.getElementById("inputHomeDesc").value;
       adminState.lineName = document.getElementById("inputLineName").value.trim() || "line oa";
       adminState.lineUrl = document.getElementById("inputLineUrl").value.trim() || "https://lin.ee/6SC6aBD";
+      adminState.igName = document.getElementById("inputIgName").value.trim() || DEFAULT_IG_NAME;
+      adminState.igUrl = document.getElementById("inputIgUrl").value.trim() || DEFAULT_IG_URL;
       adminState.review.description = document.getElementById("inputReviewDesc").value;
 
       try {
+        const latestDoc = await db.collection(SITE_COLLECTION).doc(SITE_DOC).get();
+        if (latestDoc.exists && latestDoc.data() && latestDoc.data().review && Array.isArray(latestDoc.data().review.items)) {
+          adminState.review.items = latestDoc.data().review.items;
+        }
         await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(adminState);
         alert("บันทึกข้อมูลเรียบร้อยแล้ว");
       } catch (err) {
