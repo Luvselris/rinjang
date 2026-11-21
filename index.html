@@ -21,6 +21,8 @@
       --inner-green: #edf5ea;
       --border-soft-green: #cfe0c7;
       --accent-soft-green: #b8d3ae;
+      --star-active: #89b37c;
+      --star-empty: #dcead6;
       --ink-main: #314a39;
       --ink-muted: #627a69;
       --ink-soft-black: #5c635e;
@@ -50,23 +52,23 @@
 
     .nav-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
       background-color: var(--soft-white-green);
       border: 1.5px solid var(--border-soft-green);
       border-radius: 22px;
-      padding: 6px;
+      padding: 5px;
       box-shadow: var(--shadow-soft);
       margin-bottom: 16px;
     }
 
     .nav-tab {
-      padding: 8px 4px;
+      padding: 7px 2px;
       border: none;
-      border-radius: 16px;
+      border-radius: 15px;
       background-color: transparent;
       color: var(--ink-muted);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
@@ -192,6 +194,141 @@
       display: block;
     }
 
+    .review-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: var(--inner-green);
+      border: 1px solid var(--border-soft-green);
+      border-radius: 16px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-main);
+    }
+
+    .review-form-box {
+      background-color: var(--inner-green);
+      border: 1px solid var(--border-soft-green);
+      border-radius: 18px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .star-picker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .star-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border-soft-green);
+      border-radius: 12px;
+      background-color: var(--soft-white-green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .star-btn.active {
+      background-color: var(--accent-soft-green);
+    }
+
+    .star-svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .star-svg.filled {
+      fill: var(--star-active);
+      stroke: var(--ink-main);
+      stroke-width: 1.4;
+    }
+
+    .star-svg.empty {
+      fill: var(--star-empty);
+      stroke: var(--ink-muted);
+      stroke-width: 1.4;
+    }
+
+    .review-input, .review-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border-soft-green);
+      border-radius: 14px;
+      font-size: 13px;
+      background-color: #ffffff;
+      color: var(--ink-main);
+      outline: none;
+      margin-bottom: 8px;
+    }
+
+    .review-submit-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-soft-green);
+      border-radius: 15px;
+      background-color: var(--accent-soft-green);
+      color: var(--ink-main);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .review-submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .reviews-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .review-item-card {
+      background-color: var(--inner-green);
+      border: 1px solid var(--border-soft-green);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .review-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .review-author {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink-main);
+    }
+
+    .review-stars-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .review-comment {
+      font-size: 13px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
     .posts-stack {
       display: flex;
       flex-direction: column;
@@ -200,7 +337,6 @@
       margin-top: 14px;
     }
 
-    /* ย่อขนาดกรอบสีเขียวอ่อนของโพสต์ให้เล็กลงกระชับ */
     .post-box {
       width: 100%;
       max-width: 220px;
@@ -210,7 +346,6 @@
       padding: 10px;
     }
 
-    /* รูปข้างในยังคงเต็มกรอบตามสัดส่วนจริง */
     .post-img {
       width: 100%;
       height: auto;
@@ -279,6 +414,7 @@
   <div class="container">
     <div class="nav-bar">
       <button type="button" class="nav-tab active" id="btn-home" onclick="switchTab('home')">home</button>
+      <button type="button" class="nav-tab" id="btn-review" onclick="switchTab('review')">review</button>
       <button type="button" class="nav-tab" id="btn-game" onclick="switchTab('game')">game</button>
       <button type="button" class="nav-tab" id="btn-example" onclick="switchTab('example')">example</button>
       <button type="button" class="nav-tab" id="btn-detail" onclick="switchTab('detail')">detail</button>
@@ -298,6 +434,25 @@
           <span id="lineOaLabel" class="line-oa-label">line oa</span>
           <span class="line-oa-hint">click to chat</span>
         </a>
+      </div>
+    </div>
+
+    <!-- หน้า review -->
+    <div id="panel-review" class="page-panel">
+      <div class="card">
+        <h2 class="section-heading">review</h2>
+        <p id="reviewDesc" class="section-desc"></p>
+
+        <div class="review-summary" id="reviewSummary">ยังไม่มีรีวิว</div>
+
+        <form class="review-form-box" onsubmit="submitCustomerReview(event)">
+          <div class="star-picker" id="starPicker"></div>
+          <input type="text" id="reviewerName" class="review-input" placeholder="ชื่อผู้รีวิว" maxlength="40" required>
+          <textarea id="reviewerComment" class="review-textarea" rows="2" placeholder="พิมพ์ข้อความรีวิว..." maxlength="300" required></textarea>
+          <button type="submit" id="reviewSubmitBtn" class="review-submit-btn">ส่งรีวิว</button>
+        </form>
+
+        <div id="reviewList" class="reviews-stack"></div>
       </div>
     </div>
 
@@ -358,8 +513,113 @@
     const DEFAULT_LINE_NAME = "line oa";
     const DEFAULT_LINE_URL = "https://lin.ee/6SC6aBD";
 
+    let selectedRating = 5;
+    let currentReviews = [];
+
+    function createStarSvg(isFilled) {
+      const cls = isFilled ? "star-svg filled" : "star-svg empty";
+      return `
+        <svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">
+          <polygon points="12 2.5 14.95 8.48 21.55 9.44 16.77 14.1 17.9 20.67 12 17.57 6.1 20.67 7.23 14.1 2.45 9.44 9.05 8.48 12 2.5"></polygon>
+        </svg>
+      `;
+    }
+
+    function renderStarPicker() {
+      const picker = document.getElementById("starPicker");
+      let html = "";
+      for (let i = 1; i <= 5; i++) {
+        const activeClass = i <= selectedRating ? "star-btn active" : "star-btn";
+        html += `<button type="button" class="${activeClass}" onclick="setRating(${i})" aria-label="${i} ดาว">${createStarSvg(i <= selectedRating)}</button>`;
+      }
+      picker.innerHTML = html;
+    }
+
+    function setRating(score) {
+      selectedRating = score;
+      renderStarPicker();
+    }
+
+    function renderReviewsSection(reviewData) {
+      const rObj = reviewData || {};
+      setOptionalText(document.getElementById("reviewDesc"), rObj.description || "");
+
+      const list = Array.isArray(rObj.items) ? rObj.items : [];
+      currentReviews = list;
+
+      const summaryEl = document.getElementById("reviewSummary");
+      const listEl = document.getElementById("reviewList");
+
+      if (list.length === 0) {
+        summaryEl.textContent = "ยังไม่มีรีวิว";
+        listEl.innerHTML = `<div class="empty-state">เป็นคนแรกที่เขียนรีวิวได้เลย</div>`;
+        return;
+      }
+
+      const sum = list.reduce((acc, item) => acc + (Number(item.rating) || 5), 0);
+      const avg = (sum / list.length).toFixed(1);
+      summaryEl.innerHTML = `${createStarSvg(true)} <span>${avg} / 5.0 (${list.length} รีวิว)</span>`;
+
+      listEl.innerHTML = list.map(item => {
+        const score = Math.max(1, Math.min(5, Number(item.rating) || 5));
+        let starsHtml = "";
+        for (let s = 1; s <= 5; s++) {
+          starsHtml += createStarSvg(s <= score);
+        }
+        return `
+          <div class="review-item-card">
+            <div class="review-item-top">
+              <span class="review-author">${escapeHtml(item.name || "ลูกค้า")}</span>
+              <span class="review-stars-row">${starsHtml}</span>
+            </div>
+            <div class="review-comment">${escapeHtml(item.comment || "")}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function submitCustomerReview(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById("reviewerName");
+      const commentInput = document.getElementById("reviewerComment");
+      const btn = document.getElementById("reviewSubmitBtn");
+
+      const name = nameInput.value.trim();
+      const comment = commentInput.value.trim();
+      if (!name || !comment) return;
+
+      btn.disabled = true;
+      btn.textContent = "กำลังส่ง...";
+
+      const newReview = {
+        name,
+        comment,
+        rating: selectedRating,
+        createdAt: Date.now()
+      };
+
+      const updatedItems = [newReview, ...currentReviews];
+
+      try {
+        await db.collection(SITE_COLLECTION).doc(SITE_DOC).set({
+          review: {
+            items: updatedItems
+          }
+        }, { merge: true });
+
+        nameInput.value = "";
+        commentInput.value = "";
+        setRating(5);
+      } catch (err) {
+        alert("ส่งรีวิวไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "ส่งรีวิว";
+      }
+    }
+
     function switchTab(tabName) {
-      ["home", "game", "example", "detail"].forEach(name => {
+      ["home", "review", "game", "example", "detail"].forEach(name => {
         const btn = document.getElementById(`btn-${name}`);
         const panel = document.getElementById(`panel-${name}`);
         if (name === tabName) {
@@ -434,6 +694,7 @@
       lineLabel.textContent = data.lineName || DEFAULT_LINE_NAME;
       lineBtn.href = data.lineUrl || DEFAULT_LINE_URL;
 
+      renderReviewsSection(data.review);
       renderSectionContent("game", data.game);
       renderSectionContent("example", data.example);
       renderSectionContent("detail", data.detail);
@@ -450,6 +711,7 @@
       return String(str).replace(/"/g, "&quot;");
     }
 
+    renderStarPicker();
     applySiteData({});
 
     db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
