@@ -258,6 +258,20 @@
       color: var(--ink-muted);
     }
 
+    .review-meta-line {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-main);
+      margin-bottom: 4px;
+    }
+
+    .review-text-line {
+      font-size: 12.5px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
     .post-img-actions {
       display: flex;
       align-items: center;
@@ -339,6 +353,23 @@
         </div>
       </div>
 
+      <!-- ส่วนจัดการหน้า review -->
+      <div class="card">
+        <div class="section-title">หน้า review</div>
+
+        <div class="field-group">
+          <label>คำอธิบายหน้ารีวิว</label>
+          <textarea id="inputReviewDesc" class="textarea-box" rows="2" placeholder="คำอธิบายหน้ารีวิว..."></textarea>
+        </div>
+
+        <div class="sub-block">
+          <div class="sub-block-head">
+            <span>รายการรีวิวจากลูกค้า</span>
+          </div>
+          <div id="adminReviewsList"></div>
+        </div>
+      </div>
+
       <!-- ส่วนแก้ไขหน้า game, example, detail -->
       <div id="sectionsEditor"></div>
 
@@ -386,6 +417,10 @@
       homeDescription: "",
       lineName: "line oa",
       lineUrl: "https://lin.ee/6SC6aBD",
+      review: {
+        description: "",
+        items: []
+      },
       game: createEmptySection(),
       example: createEmptySection(),
       detail: createEmptySection()
@@ -436,6 +471,19 @@
       };
     }
 
+    function normalizeReview(raw) {
+      const r = raw || {};
+      return {
+        description: typeof r.description === "string" ? r.description : "",
+        items: Array.isArray(r.items) ? r.items.map(item => ({
+          name: item && item.name ? item.name : "ลูกค้า",
+          comment: item && item.comment ? item.comment : "",
+          rating: Math.max(1, Math.min(5, Number(item && item.rating) || 5)),
+          createdAt: item && item.createdAt ? item.createdAt : Date.now()
+        })) : []
+      };
+    }
+
     async function openAdminDashboard() {
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("dashboardBox").style.display = "block";
@@ -451,6 +499,7 @@
             homeDescription: typeof d.homeDescription === "string" ? d.homeDescription : "",
             lineName: d.lineName || "line oa",
             lineUrl: d.lineUrl || "https://lin.ee/6SC6aBD",
+            review: normalizeReview(d.review),
             game: normalizeSection(d.game),
             example: normalizeSection(d.example),
             detail: normalizeSection(d.detail)
@@ -463,6 +512,31 @@
       renderAdminForm();
     }
 
+    function renderAdminReviews() {
+      const wrap = document.getElementById("adminReviewsList");
+      const items = adminState.review.items || [];
+      if (items.length === 0) {
+        wrap.innerHTML = `<div style="font-size: 12px; color: var(--ink-muted); text-align: center; padding: 6px;">ยังไม่มีรีวิว</div>`;
+        return;
+      }
+
+      wrap.innerHTML = items.map((item, idx) => `
+        <div class="row-card">
+          <div class="row-top">
+            <span>รีวิวที่ ${idx + 1} (${escapeHtml(String(item.rating))} / 5 ดาว)</span>
+            <button type="button" class="btn-remove" onclick="removeAdminReview(${idx})">ลบ</button>
+          </div>
+          <div class="review-meta-line">${escapeHtml(item.name)}</div>
+          <div class="review-text-line">${escapeHtml(item.comment)}</div>
+        </div>
+      `).join("");
+    }
+
+    function removeAdminReview(idx) {
+      adminState.review.items.splice(idx, 1);
+      renderAdminReviews();
+    }
+
     function renderAdminForm() {
       document.getElementById("prevBanner").src = adminState.banner || DEFAULT_BANNER;
       document.getElementById("inputBanner").value = adminState.banner || DEFAULT_BANNER;
@@ -472,6 +546,8 @@
       document.getElementById("inputHomeDesc").value = adminState.homeDescription || "";
       document.getElementById("inputLineName").value = adminState.lineName || "line oa";
       document.getElementById("inputLineUrl").value = adminState.lineUrl || "https://lin.ee/6SC6aBD";
+      document.getElementById("inputReviewDesc").value = adminState.review.description || "";
+      renderAdminReviews();
 
       const container = document.getElementById("sectionsEditor");
       const sectionKeys = ["game", "example", "detail"];
@@ -646,6 +722,7 @@
       adminState.homeDescription = document.getElementById("inputHomeDesc").value;
       adminState.lineName = document.getElementById("inputLineName").value.trim() || "line oa";
       adminState.lineUrl = document.getElementById("inputLineUrl").value.trim() || "https://lin.ee/6SC6aBD";
+      adminState.review.description = document.getElementById("inputReviewDesc").value;
 
       try {
         await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(adminState);
