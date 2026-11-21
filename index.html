@@ -206,6 +206,17 @@
       padding: 14px;
     }
 
+    .post-img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft-green);
+      display: block;
+      margin-bottom: 10px;
+      background-color: var(--soft-white-green);
+    }
+
     .post-title {
       font-size: 14.5px;
       font-weight: 700;
@@ -378,7 +389,9 @@
 
       const descText = (typeof sec.description === "string") ? sec.description.trim() : "";
       const linksList = Array.isArray(sec.links) ? sec.links.filter(item => item && (item.label || item.url)) : [];
-      const postsList = Array.isArray(sec.posts) ? sec.posts.filter(item => item && (item.title || item.body || item.linkUrl)) : [];
+      const postsList = Array.isArray(sec.posts)
+        ? sec.posts.filter(item => item && (item.title || item.body || item.image || item.linkUrl))
+        : [];
 
       setOptionalText(descEl, descText);
 
@@ -389,12 +402,15 @@
       }).join("");
 
       postsEl.innerHTML = postsList.map(post => {
+        const imgHtml = post.image
+          ? `<img src="${escapeAttr(post.image)}" alt="${escapeAttr(post.title || "post image")}" class="post-img">`
+          : "";
         const titleHtml = post.title ? `<div class="post-title">${escapeHtml(post.title)}</div>` : "";
         const bodyHtml = post.body ? `<div class="post-body">${escapeHtml(post.body)}</div>` : "";
         const linkBtnHtml = post.linkUrl
           ? `<a href="${escapeAttr(post.linkUrl)}" target="_blank" rel="noopener noreferrer" class="post-link-btn">${escapeHtml(post.linkLabel || "เปิดลิงก์")}</a>`
           : "";
-        return `<div class="post-box">${titleHtml}${bodyHtml}${linkBtnHtml}</div>`;
+        return `<div class="post-box">${imgHtml}${titleHtml}${bodyHtml}${linkBtnHtml}</div>`;
       }).join("");
 
       if (!descText && linksList.length === 0 && postsList.length === 0) {
