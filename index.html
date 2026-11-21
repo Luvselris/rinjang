@@ -195,50 +195,53 @@
     .posts-stack {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 12px;
       margin-top: 14px;
     }
 
+    /* ย่อขนาดกรอบสีเขียวอ่อนของโพสต์ให้เล็กลงกระชับ */
     .post-box {
+      width: 100%;
+      max-width: 220px;
       background-color: var(--inner-green);
       border: 1px solid var(--border-soft-green);
       border-radius: 18px;
-      padding: 14px;
+      padding: 10px;
     }
 
-    /* ลดเฉพาะขนาดกรอบรูปโพสต์ รูปข้างในเต็มกรอบตามสัดส่วนจริง */
+    /* รูปข้างในยังคงเต็มกรอบตามสัดส่วนจริง */
     .post-img {
       width: 100%;
-      max-width: 210px;
       height: auto;
       display: block;
-      margin: 0 auto 10px;
-      border-radius: 14px;
+      border-radius: 12px;
+      margin-bottom: 8px;
     }
 
     .post-title {
-      font-size: 14.5px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--ink-main);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .post-body {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--ink-muted);
-      line-height: 1.6;
+      line-height: 1.5;
       white-space: pre-line;
     }
 
     .post-link-btn {
       display: inline-block;
-      margin-top: 10px;
-      padding: 7px 14px;
-      border-radius: 14px;
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 12px;
       background-color: var(--accent-soft-green);
       color: var(--ink-main);
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
     }
 
