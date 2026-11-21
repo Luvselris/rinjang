@@ -24,7 +24,7 @@
       --ink-main: #314a39;
       --ink-muted: #627a69;
       --ink-soft-black: #5c635e;
-      --shadow-soft: 0 8px 24px rgba(105, 138, 108, 0.12);
+      --shadow-soft: 0 6px 18px rgba(105, 138, 108, 0.12);
     }
 
     *, *::before, *::after {
@@ -43,30 +43,30 @@
     }
 
     .container {
-      max-width: 440px;
+      max-width: 390px;
       margin: 0 auto;
-      padding: 16px 14px 56px;
+      padding: 12px 12px 44px;
     }
 
     .nav-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      gap: 4px;
       background-color: var(--soft-white-green);
       border: 1.5px solid var(--border-soft-green);
-      border-radius: 22px;
-      padding: 6px;
+      border-radius: 18px;
+      padding: 4px;
       box-shadow: var(--shadow-soft);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .nav-tab {
-      padding: 8px 4px;
+      padding: 6px 2px;
       border: none;
-      border-radius: 16px;
+      border-radius: 14px;
       background-color: transparent;
       color: var(--ink-muted);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
@@ -89,34 +89,34 @@
     .card {
       background-color: var(--soft-white-green);
       border: 1.5px solid var(--border-soft-green);
-      border-radius: 24px;
-      padding: 16px;
+      border-radius: 20px;
+      padding: 12px;
       box-shadow: var(--shadow-soft);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .home-profile-card {
       text-align: center;
-      padding-bottom: 22px;
+      padding-bottom: 16px;
     }
 
     .banner-img {
       width: 100%;
-      height: 138px;
+      height: 112px;
       object-fit: cover;
-      border-radius: 18px;
+      border-radius: 14px;
       display: block;
-      margin-bottom: -44px;
+      margin-bottom: -36px;
       border: 2px solid var(--soft-white-green);
       background-color: var(--inner-green);
     }
 
     .avatar-img {
-      width: 88px;
-      height: 88px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3.5px solid var(--soft-white-green);
+      border: 3px solid var(--soft-white-green);
       background-color: var(--inner-green);
       position: relative;
       z-index: 2;
@@ -124,17 +124,17 @@
     }
 
     .shop-title {
-      font-size: 21px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--ink-main);
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .shop-desc {
-      font-size: 13.5px;
+      font-size: 12.5px;
       color: var(--ink-muted);
-      margin-top: 8px;
-      line-height: 1.65;
+      margin-top: 6px;
+      line-height: 1.55;
       white-space: pre-line;
       display: none;
     }
@@ -147,24 +147,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
-      padding: 13px 16px;
-      border-radius: 18px;
+      padding: 10px 13px;
+      border-radius: 14px;
       background-color: var(--inner-green);
       border: 1px solid var(--border-soft-green);
       text-decoration: none;
     }
 
     .line-oa-label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--ink-main);
       text-align: left;
     }
 
     .line-oa-hint {
-      font-size: 11.5px;
+      font-size: 10.5px;
       font-weight: 500;
       color: var(--ink-soft-black);
       text-align: right;
@@ -172,17 +172,17 @@
     }
 
     .section-heading {
-      font-size: 16px;
+      font-size: 14.5px;
       font-weight: 700;
       color: var(--ink-main);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       text-align: center;
     }
 
     .section-desc {
-      font-size: 13.5px;
+      font-size: 12.5px;
       color: var(--ink-muted);
-      line-height: 1.65;
+      line-height: 1.55;
       white-space: pre-line;
       text-align: center;
       display: none;
@@ -195,80 +195,78 @@
     .posts-stack {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-top: 14px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
     .post-box {
       background-color: var(--inner-green);
       border: 1px solid var(--border-soft-green);
-      border-radius: 18px;
-      padding: 14px;
+      border-radius: 15px;
+      padding: 10px;
     }
 
     .post-img {
       width: 100%;
-      max-height: 240px;
-      object-fit: cover;
-      border-radius: 14px;
-      border: 1px solid var(--border-soft-green);
+      height: auto;
+      object-fit: contain;
+      border-radius: 11px;
       display: block;
-      margin-bottom: 10px;
-      background-color: var(--soft-white-green);
+      margin-bottom: 8px;
     }
 
     .post-title {
-      font-size: 14.5px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--ink-main);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .post-body {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--ink-muted);
-      line-height: 1.6;
+      line-height: 1.5;
       white-space: pre-line;
     }
 
     .post-link-btn {
       display: inline-block;
-      margin-top: 10px;
-      padding: 7px 14px;
-      border-radius: 14px;
+      margin-top: 8px;
+      padding: 5px 11px;
+      border-radius: 12px;
       background-color: var(--accent-soft-green);
       color: var(--ink-main);
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 700;
     }
 
     .links-stack {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .item-link-btn {
       display: block;
       width: 100%;
-      padding: 11px 14px;
-      border-radius: 16px;
+      padding: 9px 12px;
+      border-radius: 14px;
       background-color: var(--inner-green);
       border: 1px solid var(--border-soft-green);
       color: var(--ink-main);
       text-decoration: none;
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-weight: 700;
       text-align: center;
     }
 
     .empty-state {
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--ink-muted);
-      padding: 12px 6px;
+      padding: 8px 4px;
     }
   </style>
 </head>
