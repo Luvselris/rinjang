@@ -22,7 +22,7 @@
       --accent-soft-green: #b8d3ae;
       --ink-main: #314a39;
       --ink-muted: #627a69;
-      --shadow-soft: 0 8px 24px rgba(105, 138, 108, 0.12);
+      --shadow-soft: 0 6px 18px rgba(105, 138, 108, 0.12);
     }
 
     *, *::before, *::after {
@@ -36,14 +36,14 @@
       background-color: var(--soft-green-bg);
       color: var(--ink-main);
       min-height: 100vh;
-      padding: 20px 14px 64px;
+      padding: 14px 12px 48px;
       display: flex;
       justify-content: center;
     }
 
     .container {
       width: 100%;
-      max-width: 460px;
+      max-width: 400px;
     }
 
     #loginBox {
@@ -57,29 +57,29 @@
       width: 100%;
       background-color: var(--soft-white-green);
       border: 1.5px solid var(--border-soft-green);
-      border-radius: 24px;
-      padding: 18px 16px;
+      border-radius: 20px;
+      padding: 14px 12px;
       box-shadow: var(--shadow-soft);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--ink-main);
       text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .section-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--ink-main);
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .field-group {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .field-group:last-child {
@@ -88,18 +88,18 @@
 
     .field-group label {
       display: block;
-      font-size: 12.5px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--ink-muted);
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     .input-box, .textarea-box {
       width: 100%;
-      padding: 10px 13px;
+      padding: 8px 11px;
       border: 1.5px solid var(--border-soft-green);
-      border-radius: 15px;
-      font-size: 13px;
+      border-radius: 13px;
+      font-size: 12px;
       background-color: #ffffff;
       color: var(--ink-main);
       outline: none;
@@ -107,12 +107,12 @@
 
     .btn-primary {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid var(--border-soft-green);
-      border-radius: 18px;
+      border-radius: 15px;
       background-color: var(--accent-soft-green);
       color: var(--ink-main);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
     }
@@ -124,42 +124,42 @@
 
     .btn-upload {
       display: inline-block;
-      padding: 6px 13px;
-      border-radius: 13px;
+      padding: 5px 11px;
+      border-radius: 11px;
       border: 1px solid var(--border-soft-green);
       background-color: var(--accent-soft-green);
       color: var(--ink-main);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
     .btn-small {
-      padding: 6px 12px;
-      border-radius: 13px;
+      padding: 5px 10px;
+      border-radius: 11px;
       border: 1px solid var(--border-soft-green);
       background-color: var(--soft-white-green);
       color: var(--ink-main);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
     }
 
     .btn-remove {
-      padding: 5px 10px;
-      border-radius: 12px;
+      padding: 4px 9px;
+      border-radius: 10px;
       border: 1px solid var(--border-soft-green);
       background-color: #ffffff;
       color: var(--ink-main);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
     }
 
     .error-msg {
       color: var(--ink-main);
-      font-size: 12.5px;
+      font-size: 11.5px;
       text-align: center;
       margin-top: 8px;
       display: none;
@@ -173,37 +173,37 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .top-header h2 {
-      font-size: 17px;
+      font-size: 15px;
       color: var(--ink-main);
     }
 
     .btn-logout {
-      padding: 6px 12px;
-      border-radius: 14px;
+      padding: 5px 10px;
+      border-radius: 12px;
       border: 1.5px solid var(--border-soft-green);
       background-color: var(--soft-white-green);
       color: var(--ink-main);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
     }
 
     .preview-banner {
       width: 100%;
-      height: 106px;
+      height: 88px;
       object-fit: cover;
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid var(--border-soft-green);
       display: block;
     }
 
     .preview-avatar {
-      width: 72px;
-      height: 72px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       object-fit: cover;
       border: 1.5px solid var(--border-soft-green);
@@ -212,10 +212,9 @@
 
     .preview-post-img {
       width: 100%;
-      max-height: 150px;
-      object-fit: cover;
-      border-radius: 12px;
-      border: 1px solid var(--border-soft-green);
+      height: auto;
+      object-fit: contain;
+      border-radius: 10px;
       display: block;
       margin-bottom: 6px;
     }
@@ -223,26 +222,26 @@
     .sub-block {
       background-color: var(--inner-green);
       border: 1px solid var(--border-soft-green);
-      border-radius: 18px;
-      padding: 12px;
-      margin-top: 10px;
+      border-radius: 15px;
+      padding: 10px;
+      margin-top: 8px;
     }
 
     .sub-block-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
+      margin-bottom: 6px;
+      font-size: 12px;
       font-weight: 700;
     }
 
     .row-card {
       background-color: #ffffff;
       border: 1px solid var(--border-soft-green);
-      border-radius: 14px;
-      padding: 10px;
-      margin-bottom: 8px;
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 6px;
     }
 
     .row-card:last-child {
@@ -253,8 +252,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
-      font-size: 12px;
+      margin-bottom: 5px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--ink-muted);
     }
@@ -262,9 +261,9 @@
     .post-img-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
   </style>
 </head>
@@ -283,7 +282,7 @@
             <label>รหัสผ่าน</label>
             <input type="password" id="adminPass" class="input-box" placeholder="••••••••" required>
           </div>
-          <button type="submit" class="btn-primary" style="margin-top: 14px;">เข้าสู่ระบบ</button>
+          <button type="submit" class="btn-primary" style="margin-top: 12px;">เข้าสู่ระบบ</button>
           <p id="loginErr" class="error-msg">อีเมลหรือรหัสผ่านไม่ถูกต้อง</p>
         </form>
       </div>
@@ -302,7 +301,7 @@
         <div class="field-group">
           <label>แบนเนอร์</label>
           <img id="prevBanner" class="preview-banner" src="https://files.catbox.moe/2mv64c.jpeg" alt="Banner">
-          <input type="text" id="inputBanner" class="input-box" style="margin-top: 8px;" placeholder="ลิงก์รูปแบนเนอร์">
+          <input type="text" id="inputBanner" class="input-box" style="margin-top: 6px;" placeholder="ลิงก์รูปแบนเนอร์">
           <label class="btn-upload">
             เลือกรูปแบนเนอร์จากเครื่อง
             <input type="file" accept="image/*" style="display: none;" onchange="pickImageFile(this, 'banner', 'prevBanner', 'inputBanner')">
@@ -312,7 +311,7 @@
         <div class="field-group">
           <label>โปรไฟล์</label>
           <img id="prevProfile" class="preview-avatar" src="https://files.catbox.moe/h8pid8.jpeg" alt="Profile">
-          <input type="text" id="inputProfile" class="input-box" style="margin-top: 8px;" placeholder="ลิงก์รูปโปรไฟล์">
+          <input type="text" id="inputProfile" class="input-box" style="margin-top: 6px;" placeholder="ลิงก์รูปโปรไฟล์">
           <label class="btn-upload">
             เลือกรูปโปรไฟล์จากเครื่อง
             <input type="file" accept="image/*" style="display: none;" onchange="pickImageFile(this, 'profile', 'prevProfile', 'inputProfile')">
@@ -485,7 +484,7 @@
               <span>ลิงก์ที่ ${idx + 1}</span>
               <button type="button" class="btn-remove" onclick="removeSectionLink('${key}', ${idx})">ลบ</button>
             </div>
-            <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="ชื่อลิงก์" value="${escapeAttr(item.label)}" oninput="updateLinkField('${key}', ${idx}, 'label', this.value)">
+            <input type="text" class="input-box" style="margin-bottom: 5px;" placeholder="ชื่อลิงก์" value="${escapeAttr(item.label)}" oninput="updateLinkField('${key}', ${idx}, 'label', this.value)">
             <input type="url" class="input-box" placeholder="https://..." value="${escapeAttr(item.url)}" oninput="updateLinkField('${key}', ${idx}, 'url', this.value)">
           </div>
         `).join("");
@@ -501,7 +500,7 @@
                 <button type="button" class="btn-remove" onclick="removeSectionPost('${key}', ${idx})">ลบ</button>
               </div>
               ${previewHtml}
-              <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="ลิงก์รูปโพสต์ (ถ้ามี)" value="${escapeAttr(post.image)}" oninput="updatePostImageUrl('${key}', ${idx}, this.value)">
+              <input type="text" class="input-box" style="margin-bottom: 5px;" placeholder="ลิงก์รูปโพสต์ (ถ้ามี)" value="${escapeAttr(post.image)}" oninput="updatePostImageUrl('${key}', ${idx}, this.value)">
               <div class="post-img-actions">
                 <label class="btn-small" style="cursor: pointer;">
                   แนบรูปจากเครื่อง
@@ -509,9 +508,9 @@
                 </label>
                 ${post.image ? `<button type="button" class="btn-remove" onclick="clearPostImage('${key}', ${idx})">ลบรูป</button>` : ""}
               </div>
-              <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="หัวข้อโพสต์" value="${escapeAttr(post.title)}" oninput="updatePostField('${key}', ${idx}, 'title', this.value)">
-              <textarea class="textarea-box" rows="2" style="margin-bottom: 6px;" placeholder="ข้อความโพสต์" oninput="updatePostField('${key}', ${idx}, 'body', this.value)">${escapeHtml(post.body)}</textarea>
-              <input type="text" class="input-box" style="margin-bottom: 6px;" placeholder="ข้อความปุ่มลิงก์ (ถ้ามี)" value="${escapeAttr(post.linkLabel)}" oninput="updatePostField('${key}', ${idx}, 'linkLabel', this.value)">
+              <input type="text" class="input-box" style="margin-bottom: 5px;" placeholder="หัวข้อโพสต์" value="${escapeAttr(post.title)}" oninput="updatePostField('${key}', ${idx}, 'title', this.value)">
+              <textarea class="textarea-box" rows="2" style="margin-bottom: 5px;" placeholder="ข้อความโพสต์" oninput="updatePostField('${key}', ${idx}, 'body', this.value)">${escapeHtml(post.body)}</textarea>
+              <input type="text" class="input-box" style="margin-bottom: 5px;" placeholder="ข้อความปุ่มลิงก์ (ถ้ามี)" value="${escapeAttr(post.linkLabel)}" oninput="updatePostField('${key}', ${idx}, 'linkLabel', this.value)">
               <input type="url" class="input-box" placeholder="ลิงก์ในโพสต์ (ถ้ามี)" value="${escapeAttr(post.linkUrl)}" oninput="updatePostField('${key}', ${idx}, 'linkUrl', this.value)">
             </div>
           `;
@@ -546,22 +545,29 @@
       }).join("");
     }
 
-    function compressImageFile(file, maxWidth, quality, callback) {
+    function encodeImageExactRatio(file, maxSide, quality, callback) {
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          let w = img.width;
-          let h = img.height;
-          if (w > maxWidth) {
-            h = Math.round((h * maxWidth) / w);
-            w = maxWidth;
+          const origW = img.naturalWidth || img.width;
+          const origH = img.naturalHeight || img.height;
+          let targetW = origW;
+          let targetH = origH;
+          if (Math.max(origW, origH) > maxSide) {
+            if (origW >= origH) {
+              targetW = maxSide;
+              targetH = Math.round((origH * maxSide) / origW);
+            } else {
+              targetH = maxSide;
+              targetW = Math.round((origW * maxSide) / origH);
+            }
           }
           const canvas = document.createElement("canvas");
-          canvas.width = w;
-          canvas.height = h;
+          canvas.width = targetW;
+          canvas.height = targetH;
           const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, w, h);
+          ctx.drawImage(img, 0, 0, targetW, targetH);
           callback(canvas.toDataURL("image/jpeg", quality));
         };
         img.src = ev.target.result;
@@ -571,7 +577,7 @@
 
     function pickImageFile(input, stateKey, imgId, textInputId) {
       if (!input.files || !input.files[0]) return;
-      compressImageFile(input.files[0], 900, 0.82, result => {
+      encodeImageExactRatio(input.files[0], 900, 0.85, result => {
         adminState[stateKey] = result;
         document.getElementById(imgId).src = result;
         document.getElementById(textInputId).value = result;
@@ -581,7 +587,7 @@
 
     function pickPostImageFile(input, key, idx) {
       if (!input.files || !input.files[0]) return;
-      compressImageFile(input.files[0], 800, 0.8, result => {
+      encodeImageExactRatio(input.files[0], 900, 0.85, result => {
         adminState[key].posts[idx].image = result;
         renderAdminForm();
       });
