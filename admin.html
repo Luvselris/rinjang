@@ -279,6 +279,13 @@
       flex-wrap: wrap;
       margin-bottom: 8px;
     }
+
+    .storage-hint {
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      text-align: center;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -384,6 +391,7 @@
       <div id="sectionsEditor"></div>
 
       <button type="button" id="saveBtn" class="btn-primary" onclick="saveAllData()">บันทึกข้อมูลทั้งหมด</button>
+      <div class="storage-hint" id="docSizeHint">ระบบบีบอัดรูปอัตโนมัติเพื่อให้ใส่ได้หลายรูป</div>
     </div>
   </div>
 
@@ -413,6 +421,9 @@
     const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
     const DEFAULT_IG_NAME = "Instagram";
     const DEFAULT_IG_URL = "https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr";
+
+    // ขีดจำกัดเอกสาร Firestore คือ 1,048,576 bytes เผื่อปลอดภัยไว้ที่ ~920 KB
+    const MAX_SAFE_BYTES = 920000;
 
     function createEmptySection() {
       return {
@@ -526,13 +537,33 @@
       }
 
       renderAdminForm();
+      updateSizeHint();
 
       db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
         if (!doc.exists) return;
         const d = doc.data() || {};
         adminState.review = normalizeReview(d.review);
         renderAdminReviews();
+        updateSizeHint();
       });
+    }
+
+    function estimatePayloadBytes(obj) {
+      try {
+        const jsonStr = JSON.stringify(obj);
+        return new Blob([jsonStr]).size;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function updateSizeHint() {
+      const hint = document.getElementById("docSizeHint");
+      if (!hint) return;
+      const bytes = estimatePayloadBytes(adminState);
+      const kb = Math.round(bytes / 1024);
+      const maxKb = Math.round(MAX_SAFE_BYTES / 1024);
+      hint.textContent = `ขนาดข้อมูลปัจจุบันประมาณ ${kb} KB / ~${maxKb} KB (บีบอัดรูปให้อัตโนมัติ)`;
     }
 
     function renderAdminReviews() {
@@ -558,6 +589,7 @@
     async function removeAdminReview(idx) {
       adminState.review.items.splice(idx, 1);
       renderAdminReviews();
+      updateSizeHint();
       try {
         await db.collection(SITE_COLLECTION).doc(SITE_DOC).update({
           "review.items": adminState.review.items
@@ -653,30 +685,55 @@
       }).join("");
     }
 
+    function renderCanvasDataUrl(img, maxSide, quality) {
+      const origW = img.naturalWidth || img.width;
+      const origH = img.naturalHeight || img.height;
+      let targetW = origW;
+      let targetH = origH;
+
+      if (Math.max(origW, origH) > maxSide) {
+        if (origW >= origH) {
+          targetW = maxSide;
+          targetH = Math.max(1, Math.round((origH * maxSide) / origW));
+        } else {
+          targetH = maxSide;
+          targetW = Math.max(1, Math.round((origW * maxSide) / origH));
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+      return canvas.toDataURL("image/jpeg", quality);
+    }
+
     function encodeImageExactRatio(file, maxSide, quality, callback) {
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          const origW = img.naturalWidth || img.width;
-          const origH = img.naturalHeight || img.height;
-          let targetW = origW;
-          let targetH = origH;
-          if (Math.max(origW, origH) > maxSide) {
-            if (origW >= origH) {
-              targetW = maxSide;
-              targetH = Math.round((origH * maxSide) / origW);
-            } else {
-              targetH = maxSide;
-              targetW = Math.round((origW * maxSide) / origH);
+          const tiers = [
+            { side: maxSide, q: quality },
+            { side: 640, q: 0.72 },
+            { side: 480, q: 0.62 },
+            { side: 360, q: 0.55 }
+          ];
+
+          const currentBytes = estimatePayloadBytes(adminState);
+          const remainingBudget = Math.max(60000, MAX_SAFE_BYTES - currentBytes);
+
+          let chosen = renderCanvasDataUrl(img, tiers[0].side, tiers[0].q);
+          for (let i = 0; i < tiers.length; i++) {
+            const candidate = renderCanvasDataUrl(img, tiers[i].side, tiers[i].q);
+            chosen = candidate;
+            const candidateBytes = new Blob([candidate]).size;
+            if (candidateBytes <= Math.min(220000, remainingBudget * 0.75)) {
+              break;
             }
           }
-          const canvas = document.createElement("canvas");
-          canvas.width = targetW;
-          canvas.height = targetH;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, targetW, targetH);
-          callback(canvas.toDataURL("image/jpeg", quality));
+          callback(chosen);
         };
         img.src = ev.target.result;
       };
@@ -685,34 +742,39 @@
 
     function pickImageFile(input, stateKey, imgId, textInputId) {
       if (!input.files || !input.files[0]) return;
-      encodeImageExactRatio(input.files[0], 900, 0.85, result => {
+      encodeImageExactRatio(input.files[0], 720, 0.78, result => {
         adminState[stateKey] = result;
         document.getElementById(imgId).src = result;
         document.getElementById(textInputId).value = result;
+        updateSizeHint();
       });
       input.value = "";
     }
 
     function pickPostImageFile(input, key, idx) {
       if (!input.files || !input.files[0]) return;
-      encodeImageExactRatio(input.files[0], 900, 0.85, result => {
+      encodeImageExactRatio(input.files[0], 640, 0.72, result => {
         adminState[key].posts[idx].image = result;
         renderAdminForm();
+        updateSizeHint();
       });
       input.value = "";
     }
 
     function updatePostImageUrl(key, idx, val) {
       adminState[key].posts[idx].image = val;
+      updateSizeHint();
     }
 
     function clearPostImage(key, idx) {
       adminState[key].posts[idx].image = "";
       renderAdminForm();
+      updateSizeHint();
     }
 
     function updateSectionDesc(key, val) {
       adminState[key].description = val;
+      updateSizeHint();
     }
 
     function addSectionLink(key) {
@@ -723,6 +785,7 @@
     function removeSectionLink(key, idx) {
       adminState[key].links.splice(idx, 1);
       renderAdminForm();
+      updateSizeHint();
     }
 
     function updateLinkField(key, idx, field, val) {
@@ -737,10 +800,12 @@
     function removeSectionPost(key, idx) {
       adminState[key].posts.splice(idx, 1);
       renderAdminForm();
+      updateSizeHint();
     }
 
     function updatePostField(key, idx, field, val) {
       adminState[key].posts[idx][field] = val;
+      updateSizeHint();
     }
 
     async function saveAllData() {
@@ -763,10 +828,19 @@
         if (latestDoc.exists && latestDoc.data() && latestDoc.data().review && Array.isArray(latestDoc.data().review.items)) {
           adminState.review.items = latestDoc.data().review.items;
         }
+
+        const totalBytes = estimatePayloadBytes(adminState);
+        if (totalBytes > 1040000) {
+          alert("ขนาดข้อมูลรูปภาพในหน้านี้รวมกันเกินขีดจำกัดของ Firestore (1 MB) แนะนำให้ลบรูปเก่าบางส่วนหรือวางเป็นลิงก์รูปแทนครับ");
+          return;
+        }
+
         await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(adminState);
+        updateSizeHint();
         alert("บันทึกข้อมูลเรียบร้อยแล้ว");
       } catch (err) {
-        alert("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        console.error("Save error:", err);
+        alert("บันทึกไม่สำเร็จ: " + (err && err.message ? err.message : "กรุณาลองใหม่อีกครั้ง"));
       } finally {
         btn.disabled = false;
         btn.textContent = "บันทึกข้อมูลทั้งหมด";
