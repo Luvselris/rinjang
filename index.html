@@ -586,6 +586,7 @@
 
     const SITE_COLLECTION = "rinjang_site";
     const SITE_DOC = "main_config";
+    const POSTS_COLLECTION = "rinjang_posts";
 
     const DEFAULT_BANNER = "https://files.catbox.moe/2mv64c.jpeg";
     const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
@@ -596,6 +597,8 @@
 
     let selectedRating = 5;
     let currentReviews = [];
+    let latestMainData = {};
+    let latestPostsBySection = { game: [], example: [], detail: [] };
 
     function createStarSvg(isFilled) {
       const cls = isFilled ? "star-svg filled" : "star-svg empty";
@@ -753,7 +756,7 @@
       }
     }
 
-    function renderSectionContent(prefix, sectionObj) {
+    function renderSectionContent(prefix, sectionObj, externalPosts) {
       const sec = sectionObj || {};
       const descEl = document.getElementById(`${prefix}Desc`);
       const linksEl = document.getElementById(`${prefix}Links`);
@@ -762,9 +765,10 @@
 
       const descText = (typeof sec.description === "string") ? sec.description.trim() : "";
       const linksList = Array.isArray(sec.links) ? sec.links.filter(item => item && (item.label || item.url)) : [];
-      const postsList = Array.isArray(sec.posts)
-        ? sec.posts.filter(item => item && (item.title || item.body || item.image || item.linkUrl))
-        : [];
+      const rawPosts = Array.isArray(externalPosts) && externalPosts.length > 0
+        ? externalPosts
+        : (Array.isArray(sec.posts) ? sec.posts : []);
+      const postsList = rawPosts.filter(item => item && (item.title || item.body || item.image || item.linkUrl));
 
       setOptionalText(descEl, descText);
 
@@ -793,8 +797,10 @@
       }
     }
 
-    function applySiteData(raw) {
-      const data = raw || {};
+    function applySiteData(raw, postsMap) {
+      const data = raw || latestMainData || {};
+      const pMap = postsMap || latestPostsBySection;
+
       document.getElementById("homeBanner").src = data.banner || DEFAULT_BANNER;
       document.getElementById("homeAvatar").src = data.profile || DEFAULT_AVATAR;
       document.getElementById("homeShopName").textContent = data.shopName || "rinjang";
@@ -811,9 +817,9 @@
       igBtn.href = data.igUrl || DEFAULT_IG_URL;
 
       renderReviewsSection(data.review);
-      renderSectionContent("game", data.game);
-      renderSectionContent("example", data.example);
-      renderSectionContent("detail", data.detail);
+      renderSectionContent("game", data.game, pMap.game);
+      renderSectionContent("example", data.example, pMap.example);
+      renderSectionContent("detail", data.detail, pMap.detail);
     }
 
     function escapeHtml(str) {
@@ -828,14 +834,40 @@
     }
 
     renderStarPicker();
-    applySiteData({});
+    applySiteData({}, latestPostsBySection);
 
     db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
       if (doc.exists) {
-        applySiteData(doc.data());
+        latestMainData = doc.data() || {};
+        applySiteData(latestMainData, latestPostsBySection);
       }
     }, err => {
       console.error("Firestore listen error:", err);
+    });
+
+    db.collection(POSTS_COLLECTION).onSnapshot(snap => {
+      const grouped = { game: [], example: [], detail: [] };
+      snap.forEach(doc => {
+        const d = doc.data() || {};
+        if (grouped[d.section]) {
+          grouped[d.section].push({
+            id: doc.id,
+            order: typeof d.order === "number" ? d.order : 0,
+            title: d.title || "",
+            body: d.body || "",
+            image: d.image || "",
+            linkLabel: d.linkLabel || "",
+            linkUrl: d.linkUrl || ""
+          });
+        }
+      });
+      ["game", "example", "detail"].forEach(k => {
+        grouped[k].sort((a, b) => a.order - b.order);
+      });
+      latestPostsBySection = grouped;
+      applySiteData(latestMainData, latestPostsBySection);
+    }, err => {
+      console.error("Posts listen error:", err);
     });
   </script>
 </body>
