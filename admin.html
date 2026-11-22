@@ -280,7 +280,7 @@
       margin-bottom: 8px;
     }
 
-    .storage-hint {
+    .status-note {
       font-size: 11.5px;
       color: var(--ink-muted);
       text-align: center;
@@ -391,7 +391,7 @@
       <div id="sectionsEditor"></div>
 
       <button type="button" id="saveBtn" class="btn-primary" onclick="saveAllData()">บันทึกข้อมูลทั้งหมด</button>
-      <div class="storage-hint" id="docSizeHint">ระบบบีบอัดรูปอัตโนมัติเพื่อให้ใส่ได้หลายรูป</div>
+      <div class="status-note" id="saveStatusNote">แยกจัดเก็บโพสต์รายชิ้นเพื่อรองรับจำนวนโพสต์และรูปภาพได้มากขึ้น</div>
     </div>
   </div>
 
@@ -416,14 +416,14 @@
 
     const SITE_COLLECTION = "rinjang_site";
     const SITE_DOC = "main_config";
+    const POSTS_COLLECTION = "rinjang_posts";
 
     const DEFAULT_BANNER = "https://files.catbox.moe/2mv64c.jpeg";
     const DEFAULT_AVATAR = "https://files.catbox.moe/h8pid8.jpeg";
     const DEFAULT_IG_NAME = "Instagram";
     const DEFAULT_IG_URL = "https://www.instagram.com/irxnkup?knvt=cGl2b2V3NjR4bml3&utm_source=qr";
 
-    // ขีดจำกัดเอกสาร Firestore คือ 1,048,576 bytes เผื่อปลอดภัยไว้ที่ ~920 KB
-    const MAX_SAFE_BYTES = 920000;
+    let deletedPostIds = [];
 
     function createEmptySection() {
       return {
@@ -478,21 +478,29 @@
       document.getElementById("loginBox").style.display = "flex";
     }
 
-    function normalizeSection(raw) {
+    function normalizeSection(raw, postsForSection) {
       const s = raw || {};
+      const legacyPosts = Array.isArray(s.posts) ? s.posts.map((p, i) => ({
+        id: p && p.id ? p.id : "",
+        order: typeof p.order === "number" ? p.order : i,
+        title: p && p.title ? p.title : "",
+        body: p && p.body ? p.body : "",
+        image: p && p.image ? p.image : "",
+        linkLabel: p && p.linkLabel ? p.linkLabel : "",
+        linkUrl: p && p.linkUrl ? p.linkUrl : ""
+      })) : [];
+
+      const mergedPosts = Array.isArray(postsForSection) && postsForSection.length > 0
+        ? postsForSection
+        : legacyPosts;
+
       return {
         description: typeof s.description === "string" ? s.description : "",
         links: Array.isArray(s.links) ? s.links.map(l => ({
           label: l && l.label ? l.label : "",
           url: l && l.url ? l.url : ""
         })) : [],
-        posts: Array.isArray(s.posts) ? s.posts.map(p => ({
-          title: p && p.title ? p.title : "",
-          body: p && p.body ? p.body : "",
-          image: p && p.image ? p.image : "",
-          linkLabel: p && p.linkLabel ? p.linkLabel : "",
-          linkUrl: p && p.linkUrl ? p.linkUrl : ""
-        })) : []
+        posts: mergedPosts
       };
     }
 
@@ -509,12 +517,41 @@
       };
     }
 
+    async function loadPostsBySection() {
+      const grouped = { game: [], example: [], detail: [] };
+      const snap = await db.collection(POSTS_COLLECTION).get();
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        const sec = data.section;
+        if (grouped[sec]) {
+          grouped[sec].push({
+            id: doc.id,
+            order: typeof data.order === "number" ? data.order : 0,
+            title: data.title || "",
+            body: data.body || "",
+            image: data.image || "",
+            linkLabel: data.linkLabel || "",
+            linkUrl: data.linkUrl || ""
+          });
+        }
+      });
+      ["game", "example", "detail"].forEach(k => {
+        grouped[k].sort((a, b) => a.order - b.order);
+      });
+      return grouped;
+    }
+
     async function openAdminDashboard() {
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("dashboardBox").style.display = "block";
+      deletedPostIds = [];
 
       try {
-        const doc = await db.collection(SITE_COLLECTION).doc(SITE_DOC).get();
+        const [doc, groupedPosts] = await Promise.all([
+          db.collection(SITE_COLLECTION).doc(SITE_DOC).get(),
+          loadPostsBySection()
+        ]);
+
         if (doc.exists) {
           const d = doc.data() || {};
           adminState = {
@@ -527,43 +564,27 @@
             igName: d.igName || DEFAULT_IG_NAME,
             igUrl: d.igUrl || DEFAULT_IG_URL,
             review: normalizeReview(d.review),
-            game: normalizeSection(d.game),
-            example: normalizeSection(d.example),
-            detail: normalizeSection(d.detail)
+            game: normalizeSection(d.game, groupedPosts.game),
+            example: normalizeSection(d.example, groupedPosts.example),
+            detail: normalizeSection(d.detail, groupedPosts.detail)
           };
+        } else {
+          adminState.game = normalizeSection({}, groupedPosts.game);
+          adminState.example = normalizeSection({}, groupedPosts.example);
+          adminState.detail = normalizeSection({}, groupedPosts.detail);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Load error:", err);
       }
 
       renderAdminForm();
-      updateSizeHint();
 
       db.collection(SITE_COLLECTION).doc(SITE_DOC).onSnapshot(doc => {
         if (!doc.exists) return;
         const d = doc.data() || {};
         adminState.review = normalizeReview(d.review);
         renderAdminReviews();
-        updateSizeHint();
       });
-    }
-
-    function estimatePayloadBytes(obj) {
-      try {
-        const jsonStr = JSON.stringify(obj);
-        return new Blob([jsonStr]).size;
-      } catch (e) {
-        return 0;
-      }
-    }
-
-    function updateSizeHint() {
-      const hint = document.getElementById("docSizeHint");
-      if (!hint) return;
-      const bytes = estimatePayloadBytes(adminState);
-      const kb = Math.round(bytes / 1024);
-      const maxKb = Math.round(MAX_SAFE_BYTES / 1024);
-      hint.textContent = `ขนาดข้อมูลปัจจุบันประมาณ ${kb} KB / ~${maxKb} KB (บีบอัดรูปให้อัตโนมัติ)`;
     }
 
     function renderAdminReviews() {
@@ -589,7 +610,6 @@
     async function removeAdminReview(idx) {
       adminState.review.items.splice(idx, 1);
       renderAdminReviews();
-      updateSizeHint();
       try {
         await db.collection(SITE_COLLECTION).doc(SITE_DOC).update({
           "review.items": adminState.review.items
@@ -718,18 +738,14 @@
             { side: maxSide, q: quality },
             { side: 640, q: 0.72 },
             { side: 480, q: 0.62 },
-            { side: 360, q: 0.55 }
+            { side: 360, q: 0.52 }
           ];
-
-          const currentBytes = estimatePayloadBytes(adminState);
-          const remainingBudget = Math.max(60000, MAX_SAFE_BYTES - currentBytes);
 
           let chosen = renderCanvasDataUrl(img, tiers[0].side, tiers[0].q);
           for (let i = 0; i < tiers.length; i++) {
             const candidate = renderCanvasDataUrl(img, tiers[i].side, tiers[i].q);
             chosen = candidate;
-            const candidateBytes = new Blob([candidate]).size;
-            if (candidateBytes <= Math.min(220000, remainingBudget * 0.75)) {
+            if (new Blob([candidate]).size <= 450000) {
               break;
             }
           }
@@ -746,35 +762,30 @@
         adminState[stateKey] = result;
         document.getElementById(imgId).src = result;
         document.getElementById(textInputId).value = result;
-        updateSizeHint();
       });
       input.value = "";
     }
 
     function pickPostImageFile(input, key, idx) {
       if (!input.files || !input.files[0]) return;
-      encodeImageExactRatio(input.files[0], 640, 0.72, result => {
+      encodeImageExactRatio(input.files[0], 680, 0.74, result => {
         adminState[key].posts[idx].image = result;
         renderAdminForm();
-        updateSizeHint();
       });
       input.value = "";
     }
 
     function updatePostImageUrl(key, idx, val) {
       adminState[key].posts[idx].image = val;
-      updateSizeHint();
     }
 
     function clearPostImage(key, idx) {
       adminState[key].posts[idx].image = "";
       renderAdminForm();
-      updateSizeHint();
     }
 
     function updateSectionDesc(key, val) {
       adminState[key].description = val;
-      updateSizeHint();
     }
 
     function addSectionLink(key) {
@@ -785,7 +796,6 @@
     function removeSectionLink(key, idx) {
       adminState[key].links.splice(idx, 1);
       renderAdminForm();
-      updateSizeHint();
     }
 
     function updateLinkField(key, idx, field, val) {
@@ -793,19 +803,22 @@
     }
 
     function addSectionPost(key) {
-      adminState[key].posts.push({ title: "", body: "", image: "", linkLabel: "", linkUrl: "" });
+      const newId = db.collection(POSTS_COLLECTION).doc().id;
+      adminState[key].posts.push({ id: newId, title: "", body: "", image: "", linkLabel: "", linkUrl: "" });
       renderAdminForm();
     }
 
     function removeSectionPost(key, idx) {
+      const removed = adminState[key].posts[idx];
+      if (removed && removed.id) {
+        deletedPostIds.push(removed.id);
+      }
       adminState[key].posts.splice(idx, 1);
       renderAdminForm();
-      updateSizeHint();
     }
 
     function updatePostField(key, idx, field, val) {
       adminState[key].posts[idx][field] = val;
-      updateSizeHint();
     }
 
     async function saveAllData() {
@@ -813,30 +826,70 @@
       btn.disabled = true;
       btn.textContent = "กำลังบันทึก...";
 
-      adminState.banner = document.getElementById("inputBanner").value.trim() || DEFAULT_BANNER;
-      adminState.profile = document.getElementById("inputProfile").value.trim() || DEFAULT_AVATAR;
-      adminState.shopName = document.getElementById("inputShopName").value.trim() || "rinjang";
-      adminState.homeDescription = document.getElementById("inputHomeDesc").value;
-      adminState.lineName = document.getElementById("inputLineName").value.trim() || "line oa";
-      adminState.lineUrl = document.getElementById("inputLineUrl").value.trim() || "https://lin.ee/6SC6aBD";
-      adminState.igName = document.getElementById("inputIgName").value.trim() || DEFAULT_IG_NAME;
-      adminState.igUrl = document.getElementById("inputIgUrl").value.trim() || DEFAULT_IG_URL;
-      adminState.review.description = document.getElementById("inputReviewDesc").value;
+      const bannerVal = document.getElementById("inputBanner").value.trim() || DEFAULT_BANNER;
+      const profileVal = document.getElementById("inputProfile").value.trim() || DEFAULT_AVATAR;
+
+      const mainPayload = {
+        banner: bannerVal,
+        profile: profileVal,
+        shopName: document.getElementById("inputShopName").value.trim() || "rinjang",
+        homeDescription: document.getElementById("inputHomeDesc").value,
+        lineName: document.getElementById("inputLineName").value.trim() || "line oa",
+        lineUrl: document.getElementById("inputLineUrl").value.trim() || "https://lin.ee/6SC6aBD",
+        igName: document.getElementById("inputIgName").value.trim() || DEFAULT_IG_NAME,
+        igUrl: document.getElementById("inputIgUrl").value.trim() || DEFAULT_IG_URL,
+        review: {
+          description: document.getElementById("inputReviewDesc").value,
+          items: Array.isArray(adminState.review.items) ? adminState.review.items : []
+        },
+        game: {
+          description: adminState.game.description || "",
+          links: adminState.game.links || []
+        },
+        example: {
+          description: adminState.example.description || "",
+          links: adminState.example.links || []
+        },
+        detail: {
+          description: adminState.detail.description || "",
+          links: adminState.detail.links || []
+        }
+      };
 
       try {
         const latestDoc = await db.collection(SITE_COLLECTION).doc(SITE_DOC).get();
         if (latestDoc.exists && latestDoc.data() && latestDoc.data().review && Array.isArray(latestDoc.data().review.items)) {
+          mainPayload.review.items = latestDoc.data().review.items;
           adminState.review.items = latestDoc.data().review.items;
         }
 
-        const totalBytes = estimatePayloadBytes(adminState);
-        if (totalBytes > 1040000) {
-          alert("ขนาดข้อมูลรูปภาพในหน้านี้รวมกันเกินขีดจำกัดของ Firestore (1 MB) แนะนำให้ลบรูปเก่าบางส่วนหรือวางเป็นลิงก์รูปแทนครับ");
-          return;
+        await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(mainPayload);
+
+        // ลบโพสต์ที่ถูกลบออกจริงใน Firestore
+        for (const delId of deletedPostIds) {
+          await db.collection(POSTS_COLLECTION).doc(delId).delete();
+        }
+        deletedPostIds = [];
+
+        // บันทึกโพสต์ของแต่ละหน้าแยกเป็นคนละเอกสาร
+        for (const secKey of ["game", "example", "detail"]) {
+          const postsArr = adminState[secKey].posts || [];
+          for (let i = 0; i < postsArr.length; i++) {
+            const p = postsArr[i];
+            const docId = p.id || db.collection(POSTS_COLLECTION).doc().id;
+            p.id = docId;
+            await db.collection(POSTS_COLLECTION).doc(docId).set({
+              section: secKey,
+              order: i,
+              title: p.title || "",
+              body: p.body || "",
+              image: p.image || "",
+              linkLabel: p.linkLabel || "",
+              linkUrl: p.linkUrl || ""
+            });
+          }
         }
 
-        await db.collection(SITE_COLLECTION).doc(SITE_DOC).set(adminState);
-        updateSizeHint();
         alert("บันทึกข้อมูลเรียบร้อยแล้ว");
       } catch (err) {
         console.error("Save error:", err);
